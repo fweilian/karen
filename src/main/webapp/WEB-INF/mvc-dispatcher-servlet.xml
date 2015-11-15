@@ -1,0 +1,55 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <context:component-scan base-package="com.karen.fan"/>
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/pages/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!-- JDBC Data Source. It is assumed you have MySQL running on localhost
+        port 3306 with username root and blank password. Change below if it's not
+        the case -->
+    <bean id="dataSource"
+          class="com.alibaba.druid.pool.DruidDataSource"
+          init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}" />
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+        <property name="initialSize" value="${jdbc.initialSize}" />
+        <property name="maxActive" value="${jdbc.maxActive}" />
+        <property name="minIdle" value="${jdbc.minIdle}" />
+        <!--<property name="maxIdle" value="${jdbc.maxIdle}" />-->
+        <property name="maxWait" value="${jdbc.maxWait}" />
+        <property name="timeBetweenEvictionRunsMillis" value="${jdbc.timeBetweenEvictionRunsMillis}" />
+        <property name="minEvictableIdleTimeMillis" value="${jdbc.minEvictableIdleTimeMillis}" />
+        <property name="removeAbandoned" value="${jdbc.removeAbandoned}" />
+        <property name="removeAbandonedTimeout" value="${jdbc.removeAbandonedTimeout}" />
+        <property name="validationQuery" value="SELECT 1" />
+    </bean>
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="mapperLocations" value="classpath:com/karen/fan/business/mapper/*.xml" />
+    </bean>
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.karen.fan.business.mapper" />
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+    </bean>
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+</beans>
